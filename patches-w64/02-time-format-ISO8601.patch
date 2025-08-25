@@ -1,0 +1,12 @@
+diff --git a/bin/dig/dig.c b/bin/dig/dig.c
+--- a/bin/dig/dig.c
++++ b/bin/dig/dig.c
+@@ -388,7 +388,7 @@ received(unsigned int bytes, isc_sockaddr_t *from, dig_query_t *query) {
+ 		(void)localtime_s(&tmnow, &tnow);
+ 
+ 		if (strftime(time_str, sizeof(time_str),
+-			     "%a %b %d %H:%M:%S %Z %Y", &tmnow) > 0U)
++			     "%Y-%m-%dT%H:%M:%S%z", &tmnow) > 0U)
+ 		{
+ 			printf(";; WHEN: %s\n", time_str);
+ 		}

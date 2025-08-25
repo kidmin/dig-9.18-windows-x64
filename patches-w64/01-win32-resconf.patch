@@ -1,0 +1,150 @@
+diff --git a/lib/irs/resconf.c b/lib/irs/resconf.c
+--- a/lib/irs/resconf.c
++++ b/lib/irs/resconf.c
+@@ -133,6 +133,11 @@ resconf_parsesortlist(irs_resconf_t *conf, FILE *fp);
+ static isc_result_t
+ resconf_parseoption(irs_resconf_t *ctx, FILE *fp);
+ 
++isc_result_t
++get_win32_searchlist(irs_resconf_t *conf);
++isc_result_t
++get_win32_nameservers(irs_resconf_t *conf);
++
+ /*!
+  * Eat characters from FP until EOL or EOF. Returns EOF or '\n'
+  */
+@@ -619,6 +624,11 @@ irs_resconf_load(isc_mem_t *mctx, const char *filename, irs_resconf_t **confp) {
+ 		}
+ 	}
+ 
++	ret = get_win32_nameservers(conf);
++	if (ret != ISC_R_SUCCESS) {
++		goto error;
++	}
++
+ 	/* If we don't find a nameserver fall back to localhost */
+ 	if (conf->numns == 0U) {
+ 		INSIST(ISC_LIST_EMPTY(conf->nameservers));
+@@ -712,3 +722,122 @@ irs_resconf_gettimeout(irs_resconf_t *conf) {
+ 
+ 	return (unsigned int)conf->timeout;
+ }
++
++/* FROM lib/irs/win32/resconf.c, BIND 9.16.50 >>> */
++
++/*
++ * Note that on Win32 there is normally no resolv.conf since all information
++ * is stored in the registry. Therefore there is no ordering like the
++ * contents of resolv.conf. Since the "search" or "domain" keyword, on
++ * Win32 if a search list is found it is used, otherwise the domain name
++ * is used since they are mutually exclusive. The search list can be entered
++ * in the DNS tab of the "Advanced TCP/IP settings" window under the same place
++ * that you add your nameserver list.
++ */
++
++#include <iphlpapi.h>
++
++#define TCPIP_SUBKEY "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters"
++
++isc_result_t
++get_win32_searchlist(irs_resconf_t *conf) {
++	isc_result_t result = ISC_R_SUCCESS;
++	HKEY hKey;
++	char searchlist[MAX_PATH];
++	DWORD searchlen = MAX_PATH;
++	LSTATUS status;
++	char *cp;
++
++	REQUIRE(conf != NULL);
++
++	memset(searchlist, 0, MAX_PATH);
++	status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TCPIP_SUBKEY, 0, KEY_READ,
++			      &hKey);
++	if (status != ERROR_SUCCESS) {
++		return (ISC_R_SUCCESS);
++	}
++
++	status = RegQueryValueEx(hKey, "SearchList", NULL, NULL,
++				 (LPBYTE)searchlist, &searchlen);
++	RegCloseKey(hKey);
++	if (status != ERROR_SUCCESS) {
++		return (ISC_R_SUCCESS);
++	}
++
++	cp = strtok((char *)searchlist, ", \0");
++	while (cp != NULL) {
++		result = add_search(conf, cp);
++		if (result != ISC_R_SUCCESS) {
++			break;
++		}
++		cp = strtok(NULL, ", \0");
++	}
++	return (result);
++}
++
++isc_result_t
++get_win32_nameservers(irs_resconf_t *conf) {
++	isc_result_t result;
++	FIXED_INFO *FixedInfo;
++	ULONG BufLen = sizeof(FIXED_INFO);
++	DWORD dwRetVal;
++	IP_ADDR_STRING *pIPAddr;
++
++	REQUIRE(conf != NULL);
++
++	FixedInfo = (FIXED_INFO *)GlobalAlloc(GPTR, BufLen);
++	if (FixedInfo == NULL) {
++		return (ISC_R_NOMEMORY);
++	}
++	dwRetVal = GetNetworkParams(FixedInfo, &BufLen);
++	if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
++		GlobalFree(FixedInfo);
++		FixedInfo = GlobalAlloc(GPTR, BufLen);
++		if (FixedInfo == NULL) {
++			return (ISC_R_NOMEMORY);
++		}
++		dwRetVal = GetNetworkParams(FixedInfo, &BufLen);
++	}
++	if (dwRetVal != ERROR_SUCCESS) {
++		GlobalFree(FixedInfo);
++		return (ISC_R_FAILURE);
++	}
++
++	result = get_win32_searchlist(conf);
++	if (result != ISC_R_SUCCESS) {
++		goto cleanup;
++	}
++
++	if (ISC_LIST_EMPTY(conf->searchlist) &&
++	    strlen(FixedInfo->DomainName) > 0)
++	{
++		result = add_search(conf, FixedInfo->DomainName);
++		if (result != ISC_R_SUCCESS) {
++			goto cleanup;
++		}
++	}
++
++	/* Get the list of nameservers */
++	pIPAddr = &FixedInfo->DnsServerList;
++	while (pIPAddr) {
++		if (conf->numns >= RESCONFMAXNAMESERVERS) {
++			break;
++		}
++
++		result = add_server(conf->mctx, pIPAddr->IpAddress.String,
++				    &conf->nameservers);
++		if (result != ISC_R_SUCCESS) {
++			break;
++		}
++		conf->numns++;
++		pIPAddr = pIPAddr->Next;
++	}
++
++cleanup:
++	if (FixedInfo != NULL) {
++		GlobalFree(FixedInfo);
++	}
++	return (result);
++}
++
++/* <<< FROM lib/irs/win32/resconf.c, BIND 9.16.50 */

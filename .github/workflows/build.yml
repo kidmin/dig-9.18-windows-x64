@@ -1,0 +1,203 @@
+name: Build binary
+
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  OPENSSL_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-openssl-3.5.2-1-any.pkg.tar.zst
+  OPENSSL_BINARY_HASH_SHA256: e90fa980c2cb9916a2204ce61712e9876d4385b24e60cbefbaba927435c6f9f9
+  LIBUV_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-libuv-1.51.0-1-any.pkg.tar.zst
+  LIBUV_BINARY_HASH_SHA256: b1d44e3c2819f6a3cc48ecd2367aac7932fe3edcaa620d0f3244edd7d620cd0f
+  NGHTTP2_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.66.0-1-any.pkg.tar.zst
+  NGHTTP2_BINARY_HASH_SHA256: dd2cdc7011029954955bbc9a6c38292cb7269b2fc8c715fc371c22ae5853bb55
+  BIND9_VERSION: 9.18.39
+  BIND9_SOURCE_HASH_SHA256: 725755232186f3be4a07d7e40978a3389434bef7c0cdc262cc641a364072976d
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Update pacman
+        run: pacman -Syu --noconfirm
+
+      - name: Install build deps
+        run: pacman -S curl openssl tar xz patch libtool pkgconf autoconf automake mingw-w64-gcc gcc make zip --noconfirm
+
+      - name: Fetch external libraries
+        run: |
+          curl --connect-timeout 5 --max-time 30 -o openssl.pkg.tar.zst '${{ env.OPENSSL_BINARY_URL }}'
+          openssl_pkg_hash=`openssl dgst -sha256 -hex openssl.pkg.tar.zst | awk '{ print $NF; }'`
+          echo "computed hash: ${openssl_pkg_hash}"
+          if [ "${openssl_pkg_hash}" != "${{ env.OPENSSL_BINARY_HASH_SHA256 }}" ]; then
+            echo "[ERROR] OpenSSL pkg hash mismatch"
+            exit 1
+          fi
+          curl --connect-timeout 5 --max-time 30 -o libuv.pkg.tar.zst '${{ env.LIBUV_BINARY_URL }}'
+          libuv_pkg_hash=`openssl dgst -sha256 -hex libuv.pkg.tar.zst | awk '{ print $NF; }'`
+          echo "computed hash: ${libuv_pkg_hash}"
+          if [ "${libuv_pkg_hash}" != "${{ env.LIBUV_BINARY_HASH_SHA256 }}" ]; then
+            echo "[ERROR] libuv pkg hash mismatch"
+            exit 1
+          fi
+          curl --connect-timeout 5 --max-time 30 -o nghttp2.pkg.tar.zst '${{ env.NGHTTP2_BINARY_URL }}'
+          nghttp2_pkg_hash=`openssl dgst -sha256 -hex nghttp2.pkg.tar.zst | awk '{ print $NF; }'`
+          echo "computed hash: ${nghttp2_pkg_hash}"
+          if [ "${nghttp2_pkg_hash}" != "${{ env.NGHTTP2_BINARY_HASH_SHA256 }}" ]; then
+            echo "[ERROR] nghttp2 pkg hash mismatch"
+            exit 1
+          fi
+          exit 0
+
+      - name: Extract external libraries
+        run: |
+          tar -I zstdcat -C / -xf openssl.pkg.tar.zst
+          tar -I zstdcat -C / -xf libuv.pkg.tar.zst
+          tar -I zstdcat -C / -xf nghttp2.pkg.tar.zst
+
+      - name: Fetch BIND 9 source
+        run: |
+          curl --connect-timeout 5 --max-time 30 -o bind-${{ env.BIND9_VERSION }}.tar.xz https://downloads.isc.org/isc/bind9/${{ env.BIND9_VERSION }}/bind-${{ env.BIND9_VERSION }}.tar.xz
+          bind9_source_hash=`openssl dgst -sha256 -hex bind-${{ env.BIND9_VERSION }}.tar.xz | awk '{ print $NF; }'`
+          echo "computed hash: ${bind9_source_hash}"
+          if [ "${bind9_source_hash}" != "${{ env.BIND9_SOURCE_HASH_SHA256 }}" ]; then
+            echo "[ERROR] BIND 9 source hash mismatch"
+            exit 1
+          fi
+          exit 0
+
+      - name: Extract BIND 9 source
+        run: |
+          tar -xJf bind-${{ env.BIND9_VERSION }}.tar.xz
+
+      - name: Apply patches to BIND 9 source
+        run: |
+          pushd bind-${{ env.BIND9_VERSION }}
+          rm -rf bin/check bin/confgen bin/delv bin/dnssec bin/named bin/nsupdate bin/plugins bin/rndc bin/tools
+          rm -rf lib/ns
+          rm -rf Makefile.docs Makefile.tests doc fuzz tests bin/tests contrib
+          rm -rf \
+            bin/dig/host.c bin/dig/host.rst bin/dig/nslookup.c bin/dig/nslookup.rst bin/dig/readline.h lib/bind9/check.c \
+            lib/bind9/include/bind9/check.h lib/dns/adb.c lib/dns/catz.c lib/dns/client.c lib/dns/dlz.c lib/dns/dnsrps.c \
+            lib/dns/dnstap.c lib/dns/dnstap.proto lib/dns/dyndb.c lib/dns/forward.c lib/dns/geoip2.c \
+            lib/dns/gssapi_link.c lib/dns/gssapictx.c lib/dns/include/dns/adb.h lib/dns/include/dns/catz.h \
+            lib/dns/include/dns/client.h lib/dns/include/dns/dlz.h lib/dns/include/dns/dlz_dlopen.h \
+            lib/dns/include/dns/dnsrps.h lib/dns/include/dns/dnstap.h lib/dns/include/dns/dyndb.h \
+            lib/dns/include/dns/forward.h lib/dns/include/dns/geoip.h lib/dns/include/dns/journal.h \
+            lib/dns/include/dns/kasp.h lib/dns/include/dns/keymgr.h lib/dns/include/dns/keytable.h \
+            lib/dns/include/dns/librpz.h lib/dns/include/dns/lookup.h lib/dns/include/dns/nsec.h \
+            lib/dns/include/dns/nsec3.h lib/dns/include/dns/nta.h lib/dns/include/dns/peer.h \
+            lib/dns/include/dns/private.h lib/dns/include/dns/resolver.h lib/dns/include/dns/rootns.h \
+            lib/dns/include/dns/rpz.h lib/dns/include/dns/rrl.h lib/dns/include/dns/sdb.h lib/dns/include/dns/sdlz.h \
+            lib/dns/include/dns/ssu.h lib/dns/include/dns/stats.h lib/dns/include/dns/update.h \
+            lib/dns/include/dns/validator.h lib/dns/include/dns/view.h lib/dns/include/dns/xfrin.h \
+            lib/dns/include/dns/zone.h lib/dns/include/dns/zonekey.h lib/dns/include/dns/zoneverify.h \
+            lib/dns/include/dns/zt.h lib/dns/include/dst/gssapi.h lib/dns/journal.c lib/dns/kasp.c lib/dns/keymgr.c \
+            lib/dns/keytable.c lib/dns/lookup.c lib/dns/nsec.c lib/dns/nsec3.c lib/dns/nta.c lib/dns/peer.c \
+            lib/dns/private.c lib/dns/resolver.c lib/dns/rootns.c lib/dns/rpz.c lib/dns/rrl.c lib/dns/sdb.c \
+            lib/dns/sdlz.c lib/dns/ssu.c lib/dns/ssu_external.c lib/dns/stats.c lib/dns/update.c lib/dns/validator.c \
+            lib/dns/view.c lib/dns/xfrin.c lib/dns/zone.c lib/dns/zonekey.c lib/dns/zoneverify.c lib/dns/zt.c \
+            lib/isc/glob.c lib/isc/httpd.c lib/isc/include/isc/glob.h lib/isc/include/isc/httpd.h \
+            lib/isc/include/isc/interfaceiter.h lib/isc/include/isc/meminfo.h lib/isc/include/isc/ratelimiter.h \
+            lib/isc/include/isc/regex.h lib/isc/include/isc/resource.h lib/isc/include/isc/stats.h \
+            lib/isc/include/isc/syslog.h lib/isc/interfaceiter.c lib/isc/meminfo.c lib/isc/picohttpparser.c \
+            lib/isc/picohttpparser.h lib/isc/ratelimiter.c lib/isc/regex.c lib/isc/resource.c lib/isc/stats.c \
+            lib/isc/syslog.c lib/isccc/alist.c lib/isccc/cc.c lib/isccc/ccmsg.c lib/isccc/include/isccc/alist.h \
+            lib/isccc/include/isccc/cc.h lib/isccc/include/isccc/ccmsg.h lib/isccc/include/isccc/events.h \
+            lib/isccc/include/isccc/sexpr.h lib/isccc/include/isccc/symtab.h lib/isccc/include/isccc/symtype.h \
+            lib/isccc/include/isccc/util.h lib/isccc/sexpr.c lib/isccc/symtab.c lib/isccfg/include/isccfg/kaspconf.h \
+            lib/isccfg/kaspconf.c
+          patch -p1 < ../patches-w64/00-bind-9.18.39+windows-x64.patch
+          patch -p1 < ../patches-w64/01-win32-resconf.patch
+          patch -p1 < ../patches-w64/02-time-format-ISO8601.patch
+          patch -p1 < ../patches-w64/03-dns-cookie-RFC-9018-subfields.patch
+          popd
+
+      - name: Build
+        run: |
+          pushd bind-${{ env.BIND9_VERSION }}
+          autoreconf --install
+          ./configure --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 PKG_CONFIG_PATH=/ucrt64/lib/pkgconfig OPENSSL_CFLAGS='-I/ucrt64/include' OPENSSL_LIBS='-L/ucrt64/lib -lcrypto -lssl' --with-zlib=no
+          make -j4
+          cd bin/dig
+          x86_64-w64-mingw32-gcc \
+            -Wall -Wextra -Wwrite-strings -Wpointer-arith -Wno-missing-field-initializers -Wformat -Wshadow -Werror=implicit-function-declaration -Werror=missing-prototypes -Werror=format-security -Werror=parentheses -Werror=implicit -Werror=strict-prototypes -Werror=vla \
+            -fno-strict-aliasing -fno-delete-null-pointer-checks -fdiagnostics-show-option \
+            -O2 -s \
+            -Wl,-no-undefined \
+            -Wl,--dynamicbase,--export-all-symbols,--high-entropy-va,--nxcompat \
+            -o ../../../dig.exe \
+            dig.o \
+            ./.libs/libdighost.a \
+            -pthread \
+            -D_UCRT \
+            -mcrtdll=ucrt \
+            -Wl,--start-group \
+            /usr/x86_64-w64-mingw32/lib/libwinpthread.a \
+            ../../lib/isc/.libs/libisc_la-*.o \
+            ../../lib/isc/netmgr/.libs/libisc_la-*.o \
+            ../../lib/dns/.libs/libdns_la-*.o \
+            ../../lib/isccfg/.libs/libisccfg_la-*.o \
+            ../../lib/irs/.libs/libirs_la-*.o \
+            ../../lib/bind9/.libs/libbind9_la-*.o \
+            /ucrt64/lib/libuv.a \
+            -lws2_32 -lpsapi -liphlpapi -luserenv -luser32 -ldbghelp -lole32 -lshell32 -lcrypt32 -lsynchronization \
+            /ucrt64/lib/libssl.a \
+            /ucrt64/lib/libcrypto.a \
+            /ucrt64/lib/libnghttp2.a \
+            -Wl,--end-group
+          popd
+
+      - name: Create release zip archive (windows-x64)
+        run: |
+          mkdir dig-${{ env.BIND9_VERSION }}
+          cp \
+            dig.exe \
+            README.md \
+            LICENSE.BIND9.txt \
+            LICENSE.OpenSSL.txt \
+            LICENSE.libuv.txt \
+            LICENSE-extra.libuv.txt \
+            COPYING.nghttp2.txt \
+            COPYING.MinGW-w64-runtime.txt \
+            COPYING.winpthreads.txt \
+            dig-${{ env.BIND9_VERSION }}/
+          zip -r dig-${{ env.BIND9_VERSION }}.unofficial.windows-x64.zip \
+            dig-${{ env.BIND9_VERSION }}
+
+      - name: Upload materials as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            dig-${{ env.BIND9_VERSION }}.unofficial.windows-x64.zip
+
+  publish_releases:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+
+      - name: Make a release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dig-${{ env.BIND9_VERSION }}.unofficial.windows-x64.zip

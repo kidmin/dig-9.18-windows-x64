@@ -1,0 +1,64 @@
+diff --git a/lib/dns/message.c b/lib/dns/message.c
+--- a/lib/dns/message.c
++++ b/lib/dns/message.c
+@@ -4053,6 +4053,60 @@ dns_message_pseudosectiontotext(dns_message_t *msg, dns_pseudosection_t section,
+ 						ADD_STRING(target, " (bad)");
+ 					}
+ 					ADD_STRING(target, "\n");
++					if (optlen < 8) {
++						continue;
++					}
++					/* show client & server cookies */
++					ADD_STRING(target, ";  CLIENT COOKIE: ");
++					if (!utf8ok) {
++						for (i = 0; i < 8; i++) {
++							snprintf(buf, sizeof(buf),
++								 "%02x", optdata[i]);
++							ADD_STRING(target, buf);
++						}
++					} else {
++						ADD_STRING(target, "(indecipherable)");
++					}
++					ADD_STRING(target, "\n");
++					ADD_STRING(target, ";  SERVER COOKIE: ");
++					if (!utf8ok) {
++						for (i = 8; i < optlen; i++) {
++							snprintf(buf, sizeof(buf),
++								 "%02x", optdata[i]);
++							ADD_STRING(target, buf);
++						}
++					} else {
++						ADD_STRING(target, "(indecipherable)");
++					}
++					if (optlen > 8) {
++						snprintf(buf, sizeof(buf),
++							 " (%u bytes)", optlen - 8);
++						ADD_STRING(target, buf);
++					} else {
++						ADD_STRING(target, "(not set)");
++					}
++					ADD_STRING(target, "\n");
++					if (!utf8ok) {
++						if (optlen == 24 &&
++						    memcmp(optdata + 8, "\x01\x00\x00\x00", 4) == 0)
++						{
++							uint32_t timestamp;
++							memmove((char *)&timestamp, optdata + 12, 4);
++							timestamp = ntohl(timestamp);
++							ADD_STRING(target, ";   RFC 9018: "
++									   "timestamp=");
++							snprintf(buf, sizeof(buf),
++								 "%u", timestamp);
++							ADD_STRING(target, buf);
++							ADD_STRING(target, ", hash=");
++							for (i = 16; i < 24; i++) {
++								snprintf(buf, sizeof(buf),
++									 "%02x", optdata[i]);
++								ADD_STRING(target, buf);
++							}
++							ADD_STRING(target, "\n");
++						}
++					}
+ 					continue;
+ 				}
+ 
