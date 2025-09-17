@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955  # v4.3.0
 
       - name: Update pacman
         run: pacman -Syu --noconfirm
@@ -88,7 +88,7 @@ jobs:
           rm -rf bin/check bin/confgen bin/delv bin/dnssec bin/named bin/nsupdate bin/plugins bin/rndc bin/tools
           rm -rf lib/ns
           rm -rf Makefile.docs Makefile.tests doc fuzz tests bin/tests contrib
-          rm -rf \
+          rm -f \
             bin/dig/host.c bin/dig/host.rst bin/dig/nslookup.c bin/dig/nslookup.rst bin/dig/readline.h lib/bind9/check.c \
             lib/bind9/include/bind9/check.h lib/dns/adb.c lib/dns/catz.c lib/dns/client.c lib/dns/dlz.c lib/dns/dnsrps.c \
             lib/dns/dnstap.c lib/dns/dnstap.proto lib/dns/dyndb.c lib/dns/forward.c lib/dns/geoip2.c \
@@ -178,7 +178,7 @@ jobs:
             dig-${{ env.BIND9_VERSION }}
 
       - name: Upload materials as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: artifacts
           path: |
@@ -194,10 +194,10 @@ jobs:
 
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0  # v5.0.0
 
       - name: Make a release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836  # v2.3.3
         with:
           files: |
             dig-${{ env.BIND9_VERSION }}.unofficial.windows-x64.zip
