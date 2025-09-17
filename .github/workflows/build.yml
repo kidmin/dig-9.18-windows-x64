@@ -6,12 +6,12 @@ on:
       - "*"
 
 env:
-  OPENSSL_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-openssl-3.5.2-1-any.pkg.tar.zst
-  OPENSSL_BINARY_HASH_SHA256: e90fa980c2cb9916a2204ce61712e9876d4385b24e60cbefbaba927435c6f9f9
+  OPENSSL_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-openssl-3.5.2-2-any.pkg.tar.zst
+  OPENSSL_BINARY_HASH_SHA256: aed2244925955ce6382296152c38a574ea48ad402dc13fe0d8d0fae61b42412d
   LIBUV_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-libuv-1.51.0-1-any.pkg.tar.zst
   LIBUV_BINARY_HASH_SHA256: b1d44e3c2819f6a3cc48ecd2367aac7932fe3edcaa620d0f3244edd7d620cd0f
-  NGHTTP2_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.66.0-1-any.pkg.tar.zst
-  NGHTTP2_BINARY_HASH_SHA256: dd2cdc7011029954955bbc9a6c38292cb7269b2fc8c715fc371c22ae5853bb55
+  NGHTTP2_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.67.0-1-any.pkg.tar.zst
+  NGHTTP2_BINARY_HASH_SHA256: fd434226e027aea8cb80eb68813747aee9e54a68ff6cd2baa747e3b665761e7f
   BIND9_VERSION: 9.18.39
   BIND9_SOURCE_HASH_SHA256: 725755232186f3be4a07d7e40978a3389434bef7c0cdc262cc641a364072976d
 
