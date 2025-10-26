@@ -56,8 +56,8 @@ The binary executable file is statically linked against the following libraries:
 - OpenSSL
   - License: see `LICENSE.OpenSSL.txt`
   - Obtained from: [MSYS2 Package of mingw-w64-ucrt-x86_64-openssl](https://packages.msys2.org/packages/mingw-w64-ucrt-x86_64-openssl) as a binary package
-    - [binary](https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-openssl-3.5.2-2-any.pkg.tar.zst)
-    - [source](https://mirror.msys2.org/mingw/sources/mingw-w64-openssl-3.5.2-2.src.tar.zst)
+    - [binary](https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-openssl-3.5.4-1-any.pkg.tar.zst)
+    - [source](https://mirror.msys2.org/mingw/sources/mingw-w64-openssl-3.5.4-1.src.tar.zst)
 - libuv
   - License: see `LICENSE.libuv.txt` and `LICENSE-extra.libuv.txt`
   - Obtained from: [MSYS2 Package of mingw-w64-ucrt-x86_64-libuv](https://packages.msys2.org/packages/mingw-w64-ucrt-x86_64-libuv) as a binary package
@@ -66,7 +66,7 @@ The binary executable file is statically linked against the following libraries:
 - nghttp2
   - License: see `COPYING.nghttp2.txt`
   - Obtained from: [MSYS2 Package of mingw-w64-ucrt-x86_64-nghttp2](https://packages.msys2.org/packages/mingw-w64-ucrt-x86_64-nghttp2) as a binary package
-    - [binary](https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.67.0-1-any.pkg.tar.zst)
-    - [source](https://mirror.msys2.org/mingw/sources/mingw-w64-nghttp2-1.67.0-1.src.tar.zst)
+    - [binary](https://mirror.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.67.1-1-any.pkg.tar.zst)
+    - [source](https://mirror.msys2.org/mingw/sources/mingw-w64-nghttp2-1.67.1-1.src.tar.zst)
 
 The binary executable file is built with [MinGW-w64](https://www.mingw-w64.org/)/[GCC](https://gcc.gnu.org/) (see `COPYING.MinGW-w64-runtime.txt`) and winpthreads (see `COPYING.winpthreads.txt`).
