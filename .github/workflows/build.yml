@@ -12,8 +12,8 @@ env:
   LIBUV_BINARY_HASH_SHA256: b1d44e3c2819f6a3cc48ecd2367aac7932fe3edcaa620d0f3244edd7d620cd0f
   NGHTTP2_BINARY_URL: https://mirror.umd.edu/msys2/mingw/ucrt64/mingw-w64-ucrt-x86_64-nghttp2-1.67.1-1-any.pkg.tar.zst
   NGHTTP2_BINARY_HASH_SHA256: a0ac5debeb137dfc6a4d32c914caef3724a7cc79005eff2956f3bb956ec9faa8
-  BIND9_VERSION: 9.18.39
-  BIND9_SOURCE_HASH_SHA256: 725755232186f3be4a07d7e40978a3389434bef7c0cdc262cc641a364072976d
+  BIND9_VERSION: 9.18.41
+  BIND9_SOURCE_HASH_SHA256: 6ddc1d981511c4da0b203b0513af131e5d15e5f1c261145736fe1f35dd1fe79d
 
 jobs:
   build:
@@ -119,7 +119,7 @@ jobs:
             lib/isccc/include/isccc/sexpr.h lib/isccc/include/isccc/symtab.h lib/isccc/include/isccc/symtype.h \
             lib/isccc/include/isccc/util.h lib/isccc/sexpr.c lib/isccc/symtab.c lib/isccfg/include/isccfg/kaspconf.h \
             lib/isccfg/kaspconf.c
-          patch -p1 < ../patches-w64/00-bind-9.18.39+windows-x64.patch
+          patch -p1 < ../patches-w64/00-bind-9.18.41+windows-x64.patch
           patch -p1 < ../patches-w64/01-win32-resconf.patch
           patch -p1 < ../patches-w64/02-time-format-ISO8601.patch
           patch -p1 < ../patches-w64/03-dns-cookie-RFC-9018-subfields.patch

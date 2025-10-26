@@ -142,16 +142,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  #include <isc/app.h>
  #include <isc/attributes.h>
  #include <isc/dir.h>
-@@ -46,6 +48,8 @@
- 
- #include "dighost.h"
- 
-+#include <timezoneapi.h>
-+
- #define ADD_STRING(b, s)                                          \
- 	{                                                         \
- 		if (strlen(s) >= isc_buffer_availablelength(b)) { \
-@@ -68,7 +72,7 @@ static char domainopt[DNS_NAME_MAXTEXT];
+@@ -68,7 +70,7 @@ static char domainopt[DNS_NAME_MAXTEXT];
  static char hexcookie[81];
  
  static bool short_form = false, printcmd = true, plusquest = false,
@@ -160,7 +151,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  static uint32_t splitwidth = 0xffffffff;
  
  /*% opcode text */
-@@ -155,7 +159,8 @@ help(void) {
+@@ -155,7 +157,8 @@ help(void) {
  	       "debugging)\n"
  	       "                 -p port             (specify port number)\n"
  	       "                 -q name             (specify query name)\n"
@@ -170,7 +161,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  	       "                 -t type             (specify query type)\n"
  	       "                 -u                  (display times in usec "
  	       "instead of msec)\n"
-@@ -243,12 +248,6 @@ help(void) {
+@@ -243,12 +246,6 @@ help(void) {
  	       "                                      while using plain HTTP)\n"
  	       "                 +[no]identify       (ID responders in short "
  	       "answers)\n"
@@ -183,7 +174,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  	       "                 +[no]ignore         (Don't revert to TCP for "
  	       "TC responses.)\n"
  	       "                 +[no]keepalive      (Request EDNS TCP "
-@@ -386,7 +385,7 @@ received(unsigned int bytes, isc_sockaddr_t *from, dig_query_t *query) {
+@@ -386,7 +383,7 @@ received(unsigned int bytes, isc_sockaddr_t *from, dig_query_t *query) {
  		printf(";; SERVER: %s(%s) (%s)\n", fromtext, query->userarg,
  		       proto);
  		time(&tnow);
@@ -192,7 +183,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  
  		if (strftime(time_str, sizeof(time_str),
  			     "%a %b %d %H:%M:%S %Z %Y", &tmnow) > 0U)
-@@ -1663,21 +1662,13 @@ plus_option(char *option, bool is_batchfile, bool *need_clone,
+@@ -1663,21 +1660,13 @@ plus_option(char *option, bool is_batchfile, bool *need_clone,
  				switch (cmd[3]) {
  				case 'i':
  					FULLCHECK("idnin");
@@ -214,7 +205,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  					break;
  				default:
  					goto invalid_option;
-@@ -2311,8 +2302,7 @@ dash_option(char *option, char *next, dig_lookup_t **lookup,
+@@ -2311,8 +2300,7 @@ dash_option(char *option, char *next, dig_lookup_t **lookup,
  			/* deprecated */
  			break;
  		case 'r':
@@ -224,7 +215,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  			break;
  		case 'u':
  			(*lookup)->use_usec = true;
-@@ -2578,12 +2568,7 @@ preparse_args(int argc, char **argv) {
+@@ -2578,12 +2566,7 @@ preparse_args(int argc, char **argv) {
  						    ISC_MEM_DEBUGRECORD;
  				break;
  			case 'r':
@@ -238,7 +229,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  				break;
  			case '4':
  				if (ipv6only) {
-@@ -2652,10 +2637,6 @@ parse_args(bool is_batchfile, bool config_only, int argc, char **argv) {
+@@ -2652,10 +2635,6 @@ parse_args(bool is_batchfile, bool config_only, int argc, char **argv) {
  	char *bargv[64];
  	int rc;
  	char **rv;
@@ -249,7 +240,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  	bool need_clone = true;
  
  	/*
-@@ -2676,36 +2657,6 @@ parse_args(bool is_batchfile, bool config_only, int argc, char **argv) {
+@@ -2676,36 +2655,6 @@ parse_args(bool is_batchfile, bool config_only, int argc, char **argv) {
  		default_lookup->adflag = true;
  		default_lookup->edns = DEFAULT_EDNS_VERSION;
  		default_lookup->sendcookie = true;
@@ -286,7 +277,7 @@ diff --git a/bin/dig/dig.c b/bin/dig/dig.c
  	}
  
  	if (is_batchfile && !config_only) {
-@@ -3061,6 +3012,9 @@ dig_setup(int argc, char **argv) {
+@@ -3061,6 +3010,9 @@ dig_setup(int argc, char **argv) {
  	progname = argv[0];
  	preparse_args(argc, argv);
  
@@ -596,7 +587,7 @@ diff --git a/configure.ac b/configure.ac
 @@ -17,9 +17,8 @@
  m4_define([bind_VERSION_MAJOR], 9)dnl
  m4_define([bind_VERSION_MINOR], 18)dnl
- m4_define([bind_VERSION_PATCH], 39)dnl
+ m4_define([bind_VERSION_PATCH], 41)dnl
 -m4_define([bind_VERSION_EXTRA], )dnl
 +m4_define([bind_VERSION_EXTRA], +unofficial+windows-x64+extra+UNSTABLE.1)dnl
  m4_define([bind_DESCRIPTION], [(Extended Support Version)])dnl
@@ -1563,7 +1554,7 @@ diff --git a/configure.ac b/configure.ac
 -
 -# Misc
 -
--AC_CONFIG_FILES([util/check-make-install])
+-AC_CONFIG_FILES([util/check-make-install.sh])
 -
  #
  # Do it
@@ -3800,7 +3791,27 @@ diff --git a/lib/dns/dst_internal.h b/lib/dns/dst_internal.h
 diff --git a/lib/dns/dst_parse.c b/lib/dns/dst_parse.c
 --- a/lib/dns/dst_parse.c
 +++ b/lib/dns/dst_parse.c
-@@ -615,184 +615,4 @@ fail:
+@@ -130,19 +130,6 @@ find_value(const char *s, const unsigned int alg) {
+ 	return -1;
+ }
+ 
+-static const char *
+-find_tag(const int value) {
+-	int i;
+-
+-	for (i = 0;; i++) {
+-		if (map[i].tag == NULL) {
+-			return NULL;
+-		} else if (value == map[i].value) {
+-			return map[i].tag;
+-		}
+-	}
+-}
+-
+ static int
+ find_metadata(const char *s, const char *tags[], int ntags) {
+ 	int i;
+@@ -615,184 +602,4 @@ fail:
  	return ret;
  }
  
@@ -4380,7 +4391,7 @@ diff --git a/lib/dns/include/dns/db.h b/lib/dns/include/dns/db.h
  	void (*setmaxrrperset)(dns_db_t *db, uint32_t value);
  	void (*setmaxtypepername)(dns_db_t *db, uint32_t value);
  } dns_dbmethods_t;
-@@ -1479,23 +1469,6 @@ dns_db_getoriginnode(dns_db_t *db, dns_dbnode_t **nodep);
+@@ -1488,23 +1478,6 @@ dns_db_getoriginnode(dns_db_t *db, dns_dbnode_t **nodep);
   * \li	#ISC_R_NOTFOUND - the DB implementation does not support this feature.
   */
  
@@ -4404,7 +4415,7 @@ diff --git a/lib/dns/include/dns/db.h b/lib/dns/include/dns/db.h
  isc_result_t
  dns_db_getsize(dns_db_t *db, dns_dbversion_t *version, uint64_t *records,
  	       uint64_t *xfrsize);
-@@ -1601,36 +1574,6 @@ dns_db_resigned(dns_db_t *db, dns_rdataset_t *rdataset,
+@@ -1610,36 +1583,6 @@ dns_db_resigned(dns_db_t *db, dns_rdataset_t *rdataset,
   * \li	'version' to be open for writing.
   */
  
@@ -4441,7 +4452,7 @@ diff --git a/lib/dns/include/dns/db.h b/lib/dns/include/dns/db.h
  void
  dns_db_rpz_attach(dns_db_t *db, void *rpzs, uint8_t rpz_num) ISC_DEPRECATED;
  /*%<
-@@ -1746,21 +1689,6 @@ dns_db_getservestalerefresh(dns_db_t *db, uint32_t *interval);
+@@ -1755,21 +1698,6 @@ dns_db_getservestalerefresh(dns_db_t *db, uint32_t *interval);
   * \li	#ISC_R_NOTIMPLEMENTED - Not supported by this DB implementation.
   */
  
@@ -4668,7 +4679,7 @@ diff --git a/lib/dns/include/dns/dnssec.h b/lib/dns/include/dns/dnssec.h
 diff --git a/lib/dns/include/dns/message.h b/lib/dns/include/dns/message.h
 --- a/lib/dns/include/dns/message.h
 +++ b/lib/dns/include/dns/message.h
-@@ -1321,47 +1321,6 @@ dns_message_signer(dns_message_t *msg, dns_name_t *signer);
+@@ -1322,47 +1322,6 @@ dns_message_signer(dns_message_t *msg, dns_name_t *signer);
   *				  but the signature has not been verified yet
   */
  
@@ -5100,7 +5111,7 @@ diff --git a/lib/dns/message.c b/lib/dns/message.c
  
  #ifdef SKAN_MSG_DEBUG
  static void
-@@ -3185,63 +3186,6 @@ dns_message_resetsig(dns_message_t *msg) {
+@@ -3191,63 +3192,6 @@ dns_message_resetsig(dns_message_t *msg) {
  	}
  }
  
@@ -5732,7 +5743,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	/* Locked by lock. */
  	unsigned int active;
  	isc_refcount_t references;
-@@ -740,8 +724,6 @@ free_rbtdb(dns_rbtdb_t *rbtdb, bool log, isc_event_t *event);
+@@ -735,8 +719,6 @@ free_rbtdb(dns_rbtdb_t *rbtdb, bool log, isc_event_t *event);
  static void
  overmem(dns_db_t *db, bool over);
  static void
@@ -5741,7 +5752,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  setownercase(rdatasetheader_t *header, const dns_name_t *name);
  
  /*%
-@@ -815,83 +797,6 @@ free_rbtdb_callback(isc_task_t *task, isc_event_t *event) {
+@@ -810,83 +792,6 @@ free_rbtdb_callback(isc_task_t *task, isc_event_t *event) {
  	free_rbtdb(rbtdb, true, event);
  }
  
@@ -5825,7 +5836,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  static void
  set_ttl(dns_rbtdb_t *rbtdb, rdatasetheader_t *header, dns_ttl_t newttl) {
  	int idx;
-@@ -1201,16 +1106,6 @@ free_rbtdb(dns_rbtdb_t *rbtdb, bool log, isc_event_t *event) {
+@@ -1196,16 +1101,6 @@ free_rbtdb(dns_rbtdb_t *rbtdb, bool log, isc_event_t *event) {
  			    rbtdb->node_lock_count * sizeof(isc_heap_t *));
  	}
  
@@ -5842,7 +5853,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	isc_mem_put(rbtdb->common.mctx, rbtdb->node_locks,
  		    rbtdb->node_lock_count * sizeof(rbtdb_nodelock_t));
  	isc_rwlock_destroy(&rbtdb->tree_lock);
-@@ -1365,20 +1260,6 @@ newversion(dns_db_t *db, dns_dbversion_t **versionp) {
+@@ -1360,20 +1255,6 @@ newversion(dns_db_t *db, dns_dbversion_t **versionp) {
  	version->commit_ok = true;
  	version->secure = rbtdb->current_version->secure;
  	version->havensec3 = rbtdb->current_version->havensec3;
@@ -5863,7 +5874,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	isc_rwlock_init(&version->rwlock, 0, 0);
  	RWLOCK(&rbtdb->current_version->rwlock, isc_rwlocktype_read);
  	version->records = rbtdb->current_version->records;
-@@ -1506,9 +1387,6 @@ free_rdataset(dns_rbtdb_t *rbtdb, isc_mem_t *mctx, rdatasetheader_t *rdataset) {
+@@ -1501,9 +1382,6 @@ free_rdataset(dns_rbtdb_t *rbtdb, isc_mem_t *mctx, rdatasetheader_t *rdataset) {
  	unsigned int size;
  	int idx;
  
@@ -5873,7 +5884,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	idx = rdataset->node->locknum;
  	if (ISC_LINK_LINKED(rdataset, link)) {
  		INSIST(IS_CACHE(rbtdb));
-@@ -1576,6 +1454,8 @@ mark_header_ancient(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
+@@ -1571,6 +1449,8 @@ mark_header_ancient(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
  	uint_least16_t attributes = atomic_load_acquire(&header->attributes);
  	uint_least16_t newattributes = 0;
  
@@ -5882,7 +5893,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	/*
  	 * If we are already ancient there is nothing to do.
  	 */
-@@ -1587,17 +1467,7 @@ mark_header_ancient(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
+@@ -1582,17 +1462,7 @@ mark_header_ancient(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
  	} while (!atomic_compare_exchange_weak_acq_rel(
  		&header->attributes, &attributes, newattributes));
  
@@ -5900,7 +5911,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  }
  
  static void
-@@ -1605,6 +1475,8 @@ mark_header_stale(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
+@@ -1600,6 +1470,8 @@ mark_header_stale(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
  	uint_least16_t attributes = atomic_load_acquire(&header->attributes);
  	uint_least16_t newattributes = 0;
  
@@ -5909,7 +5920,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	INSIST((attributes & RDATASET_ATTR_ZEROTTL) == 0);
  
  	/*
-@@ -1617,16 +1489,6 @@ mark_header_stale(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
+@@ -1612,16 +1484,6 @@ mark_header_stale(dns_rbtdb_t *rbtdb, rdatasetheader_t *header) {
  		newattributes = attributes | RDATASET_ATTR_STALE;
  	} while (!atomic_compare_exchange_weak_acq_rel(
  		&header->attributes, &attributes, newattributes));
@@ -5926,7 +5937,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  }
  
  static void
-@@ -1703,7 +1565,7 @@ clean_zone_node(dns_rbtdb_t *rbtdb, dns_rbtnode_t *node,
+@@ -1698,7 +1560,7 @@ clean_zone_node(dns_rbtdb_t *rbtdb, dns_rbtnode_t *node,
  			down_next = dcurrent->down;
  			INSIST(dcurrent->serial <= dparent->serial);
  			if (dcurrent->serial == dparent->serial ||
@@ -5935,7 +5946,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				if (down_next != NULL) {
  					down_next->next = dparent;
-@@ -1719,7 +1581,7 @@ clean_zone_node(dns_rbtdb_t *rbtdb, dns_rbtnode_t *node,
+@@ -1714,7 +1576,7 @@ clean_zone_node(dns_rbtdb_t *rbtdb, dns_rbtnode_t *node,
  		 * We've now eliminated all IGNORE datasets with the possible
  		 * exception of current, which we now check.
  		 */
@@ -5944,7 +5955,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			down_next = current->down;
  			if (down_next == NULL) {
  				if (top_prev != NULL) {
-@@ -2341,7 +2203,6 @@ static void
+@@ -2336,7 +2198,6 @@ static void
  iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
  	dns_rdataset_t keyset;
  	dns_rdataset_t nsecset, signsecset;
@@ -5952,7 +5963,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	bool hasnsec = false;
  	isc_result_t result;
  
-@@ -2355,19 +2216,13 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
+@@ -2350,19 +2211,13 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
  		while (result == ISC_R_SUCCESS) {
  			dns_rdata_t keyrdata = DNS_RDATA_INIT;
  			dns_rdataset_current(&keyset, &keyrdata);
@@ -5975,7 +5986,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  
  	dns_rdataset_init(&nsecset);
  	dns_rdataset_init(&signsecset);
-@@ -2381,8 +2236,6 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
+@@ -2376,8 +2231,6 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
  		dns_rdataset_disassociate(&nsecset);
  	}
  
@@ -5984,7 +5995,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	/*
  	 * Do we have a valid NSEC/NSEC3 chain?
  	 */
-@@ -2393,98 +2246,6 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
+@@ -2388,98 +2241,6 @@ iszonesecure(dns_db_t *db, rbtdb_version_t *version, dns_dbnode_t *origin) {
  	}
  }
  
@@ -6083,7 +6094,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  static void
  cleanup_dead_nodes_callback(isc_task_t *task, isc_event_t *event) {
  	dns_rbtdb_t *rbtdb = event->ev_arg;
-@@ -2707,7 +2468,7 @@ closeversion(dns_db_t *db, dns_dbversion_t **versionp, bool commit) {
+@@ -2702,7 +2463,7 @@ closeversion(dns_db_t *db, dns_dbversion_t **versionp, bool commit) {
  
  		lock = &rbtdb->node_locks[header->node->locknum].lock;
  		NODE_LOCK(lock, isc_rwlocktype_write);
@@ -6092,7 +6103,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			resign_insert(rbtdb, header->node->locknum, header);
  		}
  		dns__rbtnode_release(rbtdb, header->node, least_serial,
-@@ -2993,7 +2754,7 @@ zone_zonecut_callback(dns_rbtnode_t *node, dns_name_t *name, void *arg) {
+@@ -2988,7 +2749,7 @@ zone_zonecut_callback(dns_rbtnode_t *node, dns_name_t *name, void *arg) {
  		{
  			do {
  				if (header->serial <= search->serial &&
@@ -6101,7 +6112,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  				{
  					/*
  					 * Is this a "this rdataset doesn't
-@@ -3380,7 +3141,7 @@ activeempty(rbtdb_search_t *search, dns_rbtnodechain_t *chain,
+@@ -3375,7 +3136,7 @@ activeempty(rbtdb_search_t *search, dns_rbtnodechain_t *chain,
  		for (header = node->data; header != NULL; header = header->next)
  		{
  			if (header->serial <= search->serial &&
@@ -6110,7 +6121,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				break;
  			}
-@@ -3449,7 +3210,7 @@ activeemptynode(rbtdb_search_t *search, const dns_name_t *qname,
+@@ -3444,7 +3205,7 @@ activeemptynode(rbtdb_search_t *search, const dns_name_t *qname,
  		for (header = node->data; header != NULL; header = header->next)
  		{
  			if (header->serial <= search->serial &&
@@ -6119,7 +6130,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				break;
  			}
-@@ -3480,7 +3241,7 @@ activeemptynode(rbtdb_search_t *search, const dns_name_t *qname,
+@@ -3475,7 +3236,7 @@ activeemptynode(rbtdb_search_t *search, const dns_name_t *qname,
  		for (header = node->data; header != NULL; header = header->next)
  		{
  			if (header->serial <= search->serial &&
@@ -6128,7 +6139,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				break;
  			}
-@@ -3569,7 +3330,7 @@ find_wildcard(rbtdb_search_t *search, dns_rbtnode_t **nodep,
+@@ -3564,7 +3325,7 @@ find_wildcard(rbtdb_search_t *search, dns_rbtnode_t **nodep,
  		for (header = node->data; header != NULL; header = header->next)
  		{
  			if (header->serial <= search->serial &&
@@ -6137,7 +6148,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			    !ANCIENT(header))
  			{
  				break;
-@@ -3631,7 +3392,7 @@ find_wildcard(rbtdb_search_t *search, dns_rbtnode_t **nodep,
+@@ -3626,7 +3387,7 @@ find_wildcard(rbtdb_search_t *search, dns_rbtnode_t **nodep,
  				     header = header->next)
  				{
  					if (header->serial <= search->serial &&
@@ -6146,7 +6157,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					    !ANCIENT(header))
  					{
  						break;
-@@ -3711,15 +3472,7 @@ matchparams(rdatasetheader_t *header, rbtdb_search_t *search) {
+@@ -3706,15 +3467,7 @@ matchparams(rdatasetheader_t *header, rbtdb_search_t *search) {
  		raw += rdlen;
  		result = dns_rdata_tostruct(&rdata, &nsec3, NULL);
  		INSIST(result == ISC_R_SUCCESS);
@@ -6163,7 +6174,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	}
  	return false;
  }
-@@ -3899,7 +3652,7 @@ again:
+@@ -3894,7 +3647,7 @@ again:
  			 */
  			do {
  				if (header->serial <= search->serial &&
@@ -6172,7 +6183,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  				{
  					/*
  					 * Is this a "this rdataset doesn't
-@@ -4228,7 +3981,7 @@ found:
+@@ -4223,7 +3976,7 @@ found:
  		 * Look for an active, extant rdataset.
  		 */
  		do {
@@ -6181,7 +6192,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				/*
  				 * Is this a "this rdataset doesn't
-@@ -5452,7 +5205,6 @@ tree_exit:
+@@ -5447,7 +5200,6 @@ tree_exit:
  
  	dns_rbtnodechain_reset(&search.chain);
  
@@ -6189,7 +6200,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	return result;
  }
  
-@@ -5931,7 +5683,7 @@ zone_findrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
+@@ -5926,7 +5678,7 @@ zone_findrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
  	for (header = rbtnode->data; header != NULL; header = header_next) {
  		header_next = header->next;
  		do {
@@ -6198,7 +6209,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  				/*
  				 * Is this a "this rdataset doesn't
  				 * exist" record?
-@@ -6085,8 +5837,6 @@ cache_findrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
+@@ -6080,8 +5832,6 @@ cache_findrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
  		}
  	}
  
@@ -6207,7 +6218,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	return result;
  }
  
-@@ -6157,7 +5907,7 @@ cname_and_other_data(dns_rbtnode_t *node, rbtdb_serial_t serial) {
+@@ -6152,7 +5902,7 @@ cname_and_other_data(dns_rbtnode_t *node, rbtdb_serial_t serial) {
  			 * Look for an active extant CNAME.
  			 */
  			do {
@@ -6216,7 +6227,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  				{
  					/*
  					 * Is this a "this rdataset doesn't
-@@ -6192,7 +5942,7 @@ cname_and_other_data(dns_rbtnode_t *node, rbtdb_serial_t serial) {
+@@ -6187,7 +5937,7 @@ cname_and_other_data(dns_rbtnode_t *node, rbtdb_serial_t serial) {
  				 */
  				do {
  					if (header->serial <= serial &&
@@ -6225,7 +6236,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					{
  						/*
  						 * Is this a "this rdataset
-@@ -6486,7 +6236,7 @@ find_header:
+@@ -6481,7 +6231,7 @@ find_header:
  	 * data.  We skip over them.
  	 */
  	header = topheader;
@@ -6234,7 +6245,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  		header = header->down;
  	}
  	if (header != NULL) {
-@@ -7217,13 +6967,6 @@ addrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
+@@ -7214,13 +6964,6 @@ addrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
  	NODE_LOCK(&rbtdb->node_locks[rbtnode->locknum].lock,
  		  isc_rwlocktype_write);
  
@@ -6248,7 +6259,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	if (IS_CACHE(rbtdb)) {
  		if (tree_locked) {
  			cleanup_dead_nodes(rbtdb, rbtnode->locknum);
-@@ -7363,7 +7106,7 @@ subtractrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
+@@ -7360,7 +7103,7 @@ subtractrdataset(dns_db_t *db, dns_dbnode_t *node, dns_dbversion_t *version,
  	 * data.  We skip over them.
  	 */
  	header = topheader;
@@ -6257,7 +6268,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  		header = header->down;
  	}
  	if (header != NULL && EXISTS(header)) {
-@@ -7977,49 +7720,6 @@ getoriginnode(dns_db_t *db, dns_dbnode_t **nodep) {
+@@ -7974,49 +7717,6 @@ getoriginnode(dns_db_t *db, dns_dbnode_t **nodep) {
  	return result;
  }
  
@@ -6307,7 +6318,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  static isc_result_t
  getsize(dns_db_t *db, dns_dbversion_t *version, uint64_t *records,
  	uint64_t *xfrsize) {
-@@ -8214,30 +7914,6 @@ resigned(dns_db_t *db, dns_rdataset_t *rdataset, dns_dbversion_t *version) {
+@@ -8211,30 +7911,6 @@ resigned(dns_db_t *db, dns_rdataset_t *rdataset, dns_dbversion_t *version) {
  	RWUNLOCK(&rbtdb->tree_lock, isc_rwlocktype_write);
  }
  
@@ -6338,7 +6349,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  static void
  setmaxrrperset(dns_db_t *db, uint32_t maxrrperset) {
  	dns_rbtdb_t *rbtdb = (dns_rbtdb_t *)db;
-@@ -8256,16 +7932,6 @@ setmaxtypepername(dns_db_t *db, uint32_t maxtypepername) {
+@@ -8253,16 +7929,6 @@ setmaxtypepername(dns_db_t *db, uint32_t maxtypepername) {
  	rbtdb->maxtypepername = maxtypepername;
  }
  
@@ -6355,7 +6366,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  static isc_result_t
  nodefullname(dns_db_t *db, dns_dbnode_t *node, dns_name_t *name) {
  	dns_rbtdb_t *rbtdb = (dns_rbtdb_t *)db;
-@@ -8358,18 +8024,15 @@ static dns_dbmethods_t zone_methods = { attach,
+@@ -8355,18 +8021,15 @@ static dns_dbmethods_t zone_methods = { attach,
  					settask,
  					getoriginnode,
  					NULL, /* transfernode */
@@ -6374,7 +6385,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					hashsize,
  					nodefullname,
  					getsize,
-@@ -8377,7 +8040,6 @@ static dns_dbmethods_t zone_methods = { attach,
+@@ -8374,7 +8037,6 @@ static dns_dbmethods_t zone_methods = { attach,
  					NULL, /* getservestalettl */
  					NULL, /* setservestalerefresh */
  					NULL, /* getservestalerefresh */
@@ -6382,7 +6393,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					setmaxrrperset,
  					setmaxtypepername };
  
-@@ -8410,18 +8072,15 @@ static dns_dbmethods_t cache_methods = { attach,
+@@ -8407,18 +8069,15 @@ static dns_dbmethods_t cache_methods = { attach,
  					 settask,
  					 getoriginnode,
  					 NULL, /* transfernode */
@@ -6401,7 +6412,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					 hashsize,
  					 nodefullname,
  					 NULL, /* getsize */
-@@ -8429,7 +8088,6 @@ static dns_dbmethods_t cache_methods = { attach,
+@@ -8426,7 +8085,6 @@ static dns_dbmethods_t cache_methods = { attach,
  					 getservestalettl,
  					 setservestalerefresh,
  					 getservestalerefresh,
@@ -6409,7 +6420,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  					 setmaxrrperset,
  					 setmaxtypepername };
  
-@@ -8497,25 +8155,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
+@@ -8494,25 +8152,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
  	rbtdb->node_locks = isc_mem_get(mctx, rbtdb->node_lock_count *
  						      sizeof(rbtdb_nodelock_t));
  
@@ -6435,7 +6446,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	/*
  	 * Create the heaps.
  	 */
-@@ -8658,12 +8297,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
+@@ -8655,12 +8294,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
  	rbtdb->current_version->rbtdb = rbtdb;
  	rbtdb->current_version->secure = dns_db_insecure;
  	rbtdb->current_version->havensec3 = false;
@@ -6448,7 +6459,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	isc_rwlock_init(&rbtdb->current_version->rwlock, 0, 0);
  	rbtdb->current_version->records = 0;
  	rbtdb->current_version->xfrsize = 0;
-@@ -8682,7 +8315,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
+@@ -8679,7 +8312,6 @@ dns_rbtdb_create(isc_mem_t *mctx, const dns_name_t *origin, dns_dbtype_t type,
  
  	return ISC_R_SUCCESS;
  
@@ -6456,7 +6467,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	isc_mem_put(mctx, rbtdb->node_locks,
  		    rbtdb->node_lock_count * sizeof(rbtdb_nodelock_t));
  
-@@ -9039,7 +8671,7 @@ rdatasetiter_first(dns_rdatasetiter_t *iterator) {
+@@ -9036,7 +8668,7 @@ rdatasetiter_first(dns_rdatasetiter_t *iterator) {
  					break;
  				}
  				header = header->down;
@@ -6465,7 +6476,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				if (!iterator_active(rbtdb, rbtiterator,
  						     header))
-@@ -9124,7 +8756,7 @@ rdatasetiter_next(dns_rdatasetiter_t *iterator) {
+@@ -9121,7 +8753,7 @@ rdatasetiter_next(dns_rdatasetiter_t *iterator) {
  					break;
  				}
  				header = header->down;
@@ -6474,7 +6485,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  			{
  				if (!iterator_active(rbtdb, rbtiterator,
  						     header))
-@@ -10221,18 +9853,7 @@ restart:
+@@ -10218,18 +9850,7 @@ restart:
  	 * present in the zone.
  	 */
  	if (ge == (void *)-1) {
@@ -6493,7 +6504,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	}
  
  	for (; ge != NULL; ge = ge->next) {
-@@ -10379,18 +10000,8 @@ no_glue:
+@@ -10376,18 +9997,8 @@ no_glue:
  		 * No glue was found. Cache it so.
  		 */
  		cur->glue_list = (void *)-1;
@@ -6512,7 +6523,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	}
  
  	cur->next = rbtversion->glue_table[idx];
-@@ -10590,6 +10201,8 @@ expire_header(dns_rbtdb_t *rbtdb, rdatasetheader_t *header, bool tree_locked,
+@@ -10570,6 +10181,8 @@ expire_header(dns_rbtdb_t *rbtdb, rdatasetheader_t *header, bool tree_locked,
  	set_ttl(rbtdb, header, 0);
  	mark_header_ancient(rbtdb, header);
  
@@ -6521,7 +6532,7 @@ diff --git a/lib/dns/rbtdb.c b/lib/dns/rbtdb.c
  	/*
  	 * Caller must hold the node (write) lock.
  	 */
-@@ -10606,23 +10219,6 @@ expire_header(dns_rbtdb_t *rbtdb, rdatasetheader_t *header, bool tree_locked,
+@@ -10586,23 +10199,6 @@ expire_header(dns_rbtdb_t *rbtdb, rdatasetheader_t *header, bool tree_locked,
  				     tree_locked ? isc_rwlocktype_write
  						 : isc_rwlocktype_none,
  				     false);
@@ -11999,7 +12010,7 @@ diff --git a/lib/isc/stdtime.c b/lib/isc/stdtime.c
 diff --git a/lib/isc/string.c b/lib/isc/string.c
 --- a/lib/isc/string.c
 +++ b/lib/isc/string.c
-@@ -139,5 +139,5 @@ strnstr(const char *s, const char *find, size_t slen) {
+@@ -141,5 +141,5 @@ strnstr(const char *s, const char *find, size_t slen) {
  
  int
  isc_string_strerror_r(int errnum, char *buf, size_t buflen) {
@@ -12915,7 +12926,7 @@ diff --git a/lib/isccfg/namedconf.c b/lib/isccfg/namedconf.c
  	{ "geoip-use-ecs", NULL, CFG_CLAUSEFLAG_ANCIENT },
  	{ "has-old-clients", NULL, CFG_CLAUSEFLAG_ANCIENT },
  	{ "heartbeat-interval", &cfg_type_uint32, CFG_CLAUSEFLAG_DEPRECATED },
-@@ -2075,11 +2050,7 @@ static cfg_clausedef_t view_clauses[] = {
+@@ -2076,11 +2051,7 @@ static cfg_clausedef_t view_clauses[] = {
  	{ "dnssec-must-be-secure", &cfg_type_mustbesecure,
  	  CFG_CLAUSEFLAG_MULTI | CFG_CLAUSEFLAG_DEPRECATED },
  	{ "dnssec-validation", &cfg_type_boolorauto, 0 },
@@ -12927,7 +12938,7 @@ diff --git a/lib/isccfg/namedconf.c b/lib/isccfg/namedconf.c
  	{ "dual-stack-servers", &cfg_type_nameportiplist, 0 },
  	{ "edns-udp-size", &cfg_type_uint32, 0 },
  	{ "empty-contact", &cfg_type_astring, 0 },
-@@ -2098,11 +2069,7 @@ static cfg_clausedef_t view_clauses[] = {
+@@ -2099,11 +2070,7 @@ static cfg_clausedef_t view_clauses[] = {
  	{ "ipv4only-server", &cfg_type_astring, 0 },
  	{ "ixfr-from-differences", &cfg_type_ixfrdifftype, 0 },
  	{ "lame-ttl", &cfg_type_duration, 0 },

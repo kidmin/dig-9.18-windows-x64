@@ -4,7 +4,7 @@ An unofficial port of `dig` command line utility for Windows (x64) from BIND 9
 
 ## Source
 
-The original [BIND](https://www.isc.org/bind/) 9.18.39 ([source](https://downloads.isc.org/isc/bind9/9.18.39/bind-9.18.39.tar.xz)) is licensed under the Mozilla Public License (MPL), version 2.0 (see `LICENSE.BIND9.txt`).
+The original [BIND](https://www.isc.org/bind/) 9.18.41 ([source](https://downloads.isc.org/isc/bind9/9.18.41/bind-9.18.41.tar.xz)) is licensed under the Mozilla Public License (MPL), version 2.0 (see `LICENSE.BIND9.txt`).
 This repository modifies it to run on Windows (x64) with applying patches under `patches-w64/`.
 
 For clarity, the patch files under `patches-w64/` are licensed under MPL v2.0 (NOTE: the content of `patches-w64/01-win32-resconf.patch` comes from BIND 9.16.50 [source](https://downloads.isc.org/isc/bind9/9.16.50/bind-9.16.50.tar.xz)).
